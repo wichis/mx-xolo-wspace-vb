@@ -1,4 +1,4 @@
-Sub ValidarFechasRangoVsGantt()
+Sub ValidarFechasVsGanttThenRemarcar()
     Dim ws As Worksheet
     Dim ultimaFila As Long
     Dim rangoGantt As Range
@@ -12,9 +12,11 @@ Sub ValidarFechasRangoVsGantt()
     Dim j As Long
     Dim encontradoInicio As Boolean
     Dim encontradoFin As Boolean
+    Const ESTILO_INCORRECTO As String = "Incorrecto"  ' Define el nombre del estilo
+
 
     ' Define la hoja de cálculo donde está tu Gantt
-    Set ws = ThisWorkbook.ActiveSheet ' Puedes cambiarlo por Sheets("NombreDeTuHoja")
+    Set ws = ThisWorkbook.Sheets("Plan") ' Puedes cambiarlo por Sheets("NombreDeTuHoja")
 
     ' Encuentra la última fila con datos en la columna E (Fecha Inicial)
     ultimaFila = ws.Cells(Rows.Count, "E").End(xlUp).Row
@@ -30,8 +32,8 @@ Sub ValidarFechasRangoVsGantt()
     For i = 6 To ultimaFila
         ' Obtiene las fechas de inicio y fin
         On Error Resume Next ' En caso de que las celdas de fecha estén vacías o no sean fechas válidas
-        fechaInicio = DateValue(ws.Cells(i, "E").Value)
-        fechaFin = DateValue(ws.Cells(i, "D").Value)
+        fechaInicio = DateValue(ws.Cells(i, "D").Value)
+        fechaFin = DateValue(ws.Cells(i, "E").Value)
         On Error GoTo 0
 
         ' Limpia el color de fondo de las celdas de fecha
@@ -65,15 +67,15 @@ Sub ValidarFechasRangoVsGantt()
         ' Realiza la validación
         If encontradoInicio And encontradoFin Then
             If DateValue(fechaInicio) <> DateValue(ws.Cells(4, celdaInicioGantt.Column).Value) Then
-                ws.Cells(i, "E").Interior.Color = vbRed ' Colorea la fecha de inicio
+                ws.Cells(i, "E").Style = ESTILO_INCORRECTO ' Colorea la fecha de inicio
             End If
             If DateValue(fechaFin) <> DateValue(ws.Cells(4, celdaFinGantt.Column).Value) Then
-                ws.Cells(i, "D").Interior.Color = vbRed ' Colorea la fecha de fin
+                ws.Cells(i, "D").Style = ESTILO_INCORRECTO ' Colorea la fecha de fin
             End If
         ElseIf (encontradoInicio And Not encontradoFin) Or (Not encontradoInicio And encontradoFin) Then
             ' Si solo hay un extremo marcado en el Gantt y hay fechas, también marcar
-            If IsDate(ws.Cells(i, "E").Value) Then ws.Cells(i, "E").Interior.Color = vbRed
-            If IsDate(ws.Cells(i, "D").Value) Then ws.Cells(i, "D").Interior.Color = vbRed
+            If IsDate(ws.Cells(i, "E").Value) Then ws.Cells(i, "E").Style = ESTILO_INCORRECTO
+            If IsDate(ws.Cells(i, "D").Value) Then ws.Cells(i, "D").Style = ESTILO_INCORRECTO
         Else ' Not encontradoInicio And Not encontradoFin
             ' Si no hay marcas en el Gantt, puedes decidir si las fechas son válidas o no.
             ' Por ahora, no se colorea nada en este caso. Puedes agregar lógica si deseas marcar
