@@ -34,6 +34,8 @@ Sub LlenarFechasVacias()
   Dim i As Long
   Dim resultadoIzquierda As String
   Dim resultadoDerecha As String
+  Dim celdaIzq As Range
+  Dim celdaDer As Range
 
   ' Especifica la hoja de cálculo que quieres procesar
   Set ws = ThisWorkbook.ActiveSheet ' Puedes cambiar ActiveSheet por el nombre de tu hoja (ej: Worksheets("Hoja1"))
@@ -42,20 +44,26 @@ Sub LlenarFechasVacias()
   ultimaFila = ws.Cells(Rows.Count, "A").End(xlUp).Row
 
   ' Itera a través de cada fila desde la fila 1 hasta la última fila con datos
-  For i = 1 To ultimaFila
+  For i = 6 To ultimaFila
 
     ' Para la columna D: ejecuta la función si la celda está vacía
     If Trim(ws.Cells(i, "D").Value) = "" Then
       resultadoIzquierda = CalcDireccionMasIzquierda(i)
+
+      Set celdaIzq = Range(resultadoIzquierda)
+      
       ' Escribe el resultado en la columna D
-      ws.Cells(i, "D").Value = resultadoIzquierda
+      ws.Cells(i, "D").Value = Cells(4, celdaIzq.Column).Value
     End If
 
     ' Para la columna E: ejecuta la función si la celda está vacía
     If Trim(ws.Cells(i, "E").Value) = "" Then
       resultadoDerecha = CalcDireccionMasDerecha(i)
+      
+      Set celdaDer = Range(resultadoDerecha)
+      
       ' Escribe el resultado en la columna E
-      ws.Cells(i, "E").Value = resultadoDerecha
+      ws.Cells(i, "E").Value = Cells(4, celdaDer.Column).Value
     End If
 
   Next i
