@@ -1,19 +1,3 @@
-' *****************************************************************************************
-' Sub DibujarGanttEnFilasVacias
-' Descripción:
-'   Este procedimiento recorre las filas de una hoja de cálculo a partir de la fila 6 y,
-'   si encuentra valores en la columna A, llama a otra función para llenar las celdas vacías
-'   de un diagrama de Gantt con un valor específico.
-' 
-' Parámetros:
-'   Ninguno
-' 
-' Notas:
-'   - El rango del Gantt se asume que comienza en la celda K6 y se extiende hasta la última 
-'     columna con datos en la fila 6.
-'   - Esta función muestra un mensaje al finalizar el proceso.
-' 
-' *****************************************************************************************
 Sub DibujarGanttSiFilaVacia()
     Dim ws As Worksheet
     Dim ultimaFilaA As Long
