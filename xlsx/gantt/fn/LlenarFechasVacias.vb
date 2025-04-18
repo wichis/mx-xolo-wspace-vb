@@ -38,7 +38,7 @@ Sub LlenarFechasVacias()
   Dim celdaDer As Range
 
   ' Especifica la hoja de cálculo que quieres procesar
-  Set ws = ThisWorkbook.ActiveSheet ' Puedes cambiar ActiveSheet por el nombre de tu hoja (ej: Worksheets("Hoja1"))
+  Set ws = ThisWorkbook.Worksheets("Plan") ' Puedes cambiar ActiveSheet por el nombre de tu hoja (ej: Worksheets("Hoja1"))
 
   ' Encuentra la última fila con datos en alguna columna (ajusta la columna si es necesario)
   ultimaFila = ws.Cells(Rows.Count, "A").End(xlUp).Row
