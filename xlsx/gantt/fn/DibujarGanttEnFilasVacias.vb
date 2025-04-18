@@ -1,3 +1,19 @@
+' *****************************************************************************************
+' Sub DibujarGanttEnFilasVacias
+' Descripción:
+'   Este procedimiento recorre las filas de una hoja de cálculo a partir de la fila 6 y,
+'   si encuentra valores en la columna A, llama a otra función para llenar las celdas vacías
+'   de un diagrama de Gantt con un valor específico.
+' 
+' Parámetros:
+'   Ninguno
+' 
+' Notas:
+'   - El rango del Gantt se asume que comienza en la celda K6 y se extiende hasta la última 
+'     columna con datos en la fila 6.
+'   - Esta función muestra un mensaje al finalizar el proceso.
+' 
+' *****************************************************************************************
 Sub DibujarGanttEnFilasVacias()
     Dim ws As Worksheet
     Dim ultimaFilaA As Long
@@ -27,6 +43,27 @@ Sub DibujarGanttEnFilasVacias()
 
     MsgBox "Proceso de llenado del Gantt completado para filas con valores en la columna A.", vbInformation
 End Sub
+
+
+' *****************************************************************************************
+' Sub LlenarGanttSiVacio
+' Descripción:
+'   Este procedimiento llena las celdas vacías de una fila específica del diagrama de
+'   Gantt dentro de un rango dado, basándose en fechas de inicio y fin.
+' 
+' Parámetros:
+'   fila (Long)                - Número de la fila a procesar.
+'   rangoGantt (Range)         - Rango que define el área del diagrama de Gantt.
+'   columnaInicioFechas (String) - Letra de la columna donde se encuentra la fecha de inicio.
+'   columnaFinFechas (String)  - Letra de la columna donde se encuentra la fecha de fin.
+'   valorLlenado (String)      - Valor con el que se llenarán las celdas del Gantt.
+' 
+' Notas:
+'   - Si las fechas de la fila no son válidas o están fuera del rango del Gantt, no se realiza
+'     ninguna acción.
+'   - Si la fila del Gantt ya contiene valores, no se sobrescriben.
+' 
+' *****************************************************************************************
 
 Sub LlenarGanttSiVacio(fila As Long, rangoGantt As Range, columnaInicioFechas As String, columnaFinFechas As String, valorLlenado As String)
     Dim ws As Worksheet
