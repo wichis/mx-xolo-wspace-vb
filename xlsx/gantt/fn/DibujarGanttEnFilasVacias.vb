@@ -14,113 +14,100 @@
 '   - Esta función muestra un mensaje al finalizar el proceso.
 ' 
 ' *****************************************************************************************
-Sub DibujarGanttEnFilasVacias()
+Sub DibujarGanttSiFilaVacia()
     Dim ws As Worksheet
     Dim ultimaFilaA As Long
-    Dim rangoGantt As Range
-    Dim filaActual As Long
-
-    ' Define la hoja de cálculo
-    Set ws = ThisWorkbook.ActiveSheet ' Puedes cambiarlo por Sheets("NombreDeTuHoja")
-
-    ' Encuentra la última fila con datos en la columna A
-    ultimaFilaA = ws.Cells(Rows.Count, "A").End(xlUp).Row
-
-    ' Define el rango donde se dibuja el Gantt (ajusta si es necesario)
-    ' Asumimos que el rango Gantt comienza en K6 y se extiende hasta la última columna con datos en cualquier fila
+    Dim rangoGanttEncabezados As Range ' Rango de las fechas en la fila 4
+    Dim primeraColumnaGantt As Long
     Dim ultimaColumnaGantt As Long
-    ultimaColumnaGantt = ws.Cells(6, Columns.Count).End(xlToLeft).Column ' Encuentra la última columna con datos en la fila 6 (puedes ajustarlo si es necesario)
-    Set rangoGantt = ws.Range("K6", ws.Cells(ultimaFilaA, ultimaColumnaGantt))
-
-    ' Itera a través de las filas con valores en la columna A (a partir de la fila 6)
-    For filaActual = 6 To ultimaFilaA
-        ' Verifica si hay un valor en la columna A de la fila actual
-        If Not IsEmpty(ws.Cells(filaActual, "A").Value) Then
-            ' Llama a la función para llenar el Gantt si la fila está vacía
-            Call LlenarGanttSiVacio(filaActual, rangoGantt, "E", "D", "x")
-        End If
-    Next filaActual
-
-    MsgBox "Proceso de llenado del Gantt completado para filas con valores en la columna A.", vbInformation
-End Sub
-
-
-' *****************************************************************************************
-' Sub LlenarGanttSiVacio
-' Descripción:
-'   Este procedimiento llena las celdas vacías de una fila específica del diagrama de
-'   Gantt dentro de un rango dado, basándose en fechas de inicio y fin.
-' 
-' Parámetros:
-'   fila (Long)                - Número de la fila a procesar.
-'   rangoGantt (Range)         - Rango que define el área del diagrama de Gantt.
-'   columnaInicioFechas (String) - Letra de la columna donde se encuentra la fecha de inicio.
-'   columnaFinFechas (String)  - Letra de la columna donde se encuentra la fecha de fin.
-'   valorLlenado (String)      - Valor con el que se llenarán las celdas del Gantt.
-' 
-' Notas:
-'   - Si las fechas de la fila no son válidas o están fuera del rango del Gantt, no se realiza
-'     ninguna acción.
-'   - Si la fila del Gantt ya contiene valores, no se sobrescriben.
-' 
-' *****************************************************************************************
-
-Sub LlenarGanttSiVacio(fila As Long, rangoGantt As Range, columnaInicioFechas As String, columnaFinFechas As String, valorLlenado As String)
-    Dim ws As Worksheet
-    Dim fechaInicio As Date
-    Dim fechaFin As Date
-    Dim fechaInicioGantt As Date
+    Dim filaActual As Long
+    Dim fechaInicioActividad As Date
+    Dim fechaFinActividad As Date
     Dim columnaInicioGantt As Long
     Dim columnaFinGantt As Long
     Dim i As Long
-    Dim celdaGantt As Range
-    Dim estaVacio As Boolean
+    Dim celdaGanttFila As Range
+    Dim estaFilaGanttVacia As Boolean
 
-    ' Define la hoja de cálculo
-    Set ws = rangoGantt.Parent
+    ' Define la hoja de cálculo "Plan"
+    Set ws = ThisWorkbook.Sheets("Plan") ' Asegúrate de que tu hoja se llama "Plan"
 
-    ' Obtiene las fechas de inicio y fin de la fila especificada
-    On Error Resume Next
-    fechaInicio = DateValue(ws.Cells(fila, columnaInicioFechas).Value)
-    fechaFin = DateValue(ws.Cells(fila, columnaFinFechas).Value)
-    On Error GoTo 0
+    ' Encuentra la última fila con datos en la columna A (a partir de la fila 6)
+    ultimaFilaA = ws.Cells(Rows.Count, "A").End(xlUp).Row
 
-    ' Si las fechas no son válidas, sale de la función
-    If Not IsDate(fechaInicio) Or Not IsDate(fechaFin) Then
-        ' Puedes optar por no mostrar un mensaje aquí si se procesan muchas filas automáticamente
-        ' MsgBox "Fechas de inicio o fin no válidas en la fila " & fila, vbExclamation
-        Exit Sub
-    End If
+    ' Define el rango de los encabezados de fecha del Gantt (fila 4, desde la columna K hasta la última columna con fecha)
+    Set rangoGanttEncabezados = ws.Range("K4", ws.Cells(4, Columns.Count).End(xlToLeft))
+    primeraColumnaGantt = rangoGanttEncabezados.Column
+    ultimaColumnaGantt = rangoGanttEncabezados.Column + rangoGanttEncabezados.Columns.Count - 1
 
-    ' Obtiene la fecha de inicio del calendario del Gantt (fila 4, primera columna del rango Gantt)
-    fechaInicioGantt = ws.Cells(4, rangoGantt.Column).Value
+    ' Itera a través de las filas desde la 6 hasta la última fila con valor en la columna A
+    For filaActual = 6 To ultimaFilaA
+        ' Verifica si la columna A de la fila actual tiene un valor
+        If Not IsEmpty(ws.Cells(filaActual, "A").Value) Then
+            ' Lee la fecha de inicio (columna E) y fin (columna D)
+            On Error Resume Next
+            fechaInicioActividad = DateValue(ws.Cells(filaActual, "D").Value)
+            fechaFinActividad = DateValue(ws.Cells(filaActual, "E").Value)
+            On Error GoTo 0
 
-    ' Calcula las columnas de inicio y fin en el Gantt
-    columnaInicioGantt = rangoGantt.Column + DateDiff("d", fechaInicioGantt, fechaInicio)
-    columnaFinGantt = rangoGantt.Column + DateDiff("d", fechaInicioGantt, fechaFin)
+            ' Verifica si las fechas son válidas
+            If IsDate(fechaInicioActividad) And IsDate(fechaFinActividad) Then
+                ' Define el rango de la fila actual del Gantt (desde la primera hasta la última columna del encabezado)
+                Dim rangoFilaGantt As Range
+                Set rangoFilaGantt = ws.Range(ws.Cells(filaActual, primeraColumnaGantt), ws.Cells(filaActual, ultimaColumnaGantt))
 
-    ' Verifica si la fila del Gantt está vacía
-    estaVacio = True
-    For Each celdaGantt In ws.Rows(fila).Range(rangoGantt.Address)
-        If Not IsEmpty(celdaGantt.Value) Then
-            estaVacio = False
-            Exit For
+                ' Verifica si la fila del Gantt está vacía
+                estaFilaGanttVacia = True
+                For Each celdaGanttFila In rangoFilaGantt
+                    If Not IsEmpty(celdaGanttFila.Value) Then
+                        estaFilaGanttVacia = False
+                        Exit For
+                    End If
+                Next celdaGanttFila
+
+                ' Si la fila del Gantt está vacía, procede a dibujar
+                If estaFilaGanttVacia Then
+                    ' Encuentra la columna de inicio en el Gantt
+                    columnaInicioGantt = 0
+                    For i = primeraColumnaGantt To ultimaColumnaGantt
+                        If DateValue(ws.Cells(4, i).Value) = DateValue(fechaInicioActividad) Then
+                            columnaInicioGantt = i
+                            Exit For
+                        End If
+                    Next i
+
+                    ' Encuentra la columna de fin en el Gantt
+                    columnaFinGantt = 0
+                    For i = primeraColumnaGantt To ultimaColumnaGantt
+                        If DateValue(ws.Cells(4, i).Value) = DateValue(fechaFinActividad) Then
+                            columnaFinGantt = i
+                            Exit For
+                        End If
+                    Next i
+
+                    ' Si se encontraron las columnas de inicio y fin, llena el rango con "x"
+                    If columnaInicioGantt > 0 And columnaFinGantt > 0 Then
+                        ' Asegurarse de que la columna de fin no sea anterior a la de inicio
+                        If columnaFinGantt >= columnaInicioGantt Then
+                            ws.Range(ws.Cells(filaActual, columnaInicioGantt), ws.Cells(filaActual, columnaFinGantt)).Value = "x"
+                        Else
+                            MsgBox "La fecha de fin es anterior a la fecha de inicio en la fila " & filaActual & ".", vbExclamation
+                        End If
+                    Else
+                        If columnaInicioGantt = 0 Then
+                            MsgBox "No se encontró la fecha de inicio en el encabezado del Gantt para la fila " & filaActual & ".", vbExclamation
+                        End If
+                        If columnaFinGantt = 0 Then
+                            MsgBox "No se encontró la fecha de fin en el encabezado del Gantt para la fila " & filaActual & ".", vbExclamation
+                        End If
+                    End If
+                End If
+            Else
+                ' Si las fechas no son válidas, podrías mostrar un mensaje o simplemente omitir la fila
+                MsgBox "Fechas de inicio o fin no válidas en la fila " & filaActual & ".", vbExclamation
+            End If
         End If
-    Next celdaGantt
+    Next filaActual
 
-    ' Llena la fila del Gantt si está vacía y las columnas calculadas están dentro del rango
-    If estaVacio Then
-        If columnaInicioGantt >= rangoGantt.Column And columnaFinGantt <= rangoGantt.Column + rangoGantt.Columns.Count - 1 Then
-            For i = columnaInicioGantt To columnaFinGantt
-                ws.Cells(fila, i).Value = valorLlenado
-            Next i
-        Else
-            ' Puedes optar por no mostrar un mensaje aquí si se procesan muchas filas automáticamente
-            ' MsgBox "Las fechas de la fila " & fila & " están fuera del rango del Gantt.", vbExclamation
-        End If
-    Else
-        ' Puedes optar por no mostrar un mensaje aquí si se procesan muchas filas automáticamente
-        ' MsgBox "La fila " & fila & " del Gantt ya contiene valores.", vbInformation
-    End If
-
+    MsgBox "Proceso de dibujo del Gantt completado.", vbInformation
 End Sub
