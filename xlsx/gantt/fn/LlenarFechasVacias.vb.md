@@ -27,100 +27,106 @@
 ' Mensajes:
 '   - Al finalizar, muestra un mensaje indicando que el proceso ha sido completado.
 ' ***********************************************************************
-Sub DibujarGanttSiFilaVacia()
-    Dim ws As Worksheet
-    Dim ultimaFilaA As Long
-    Dim rangoGanttEncabezados As Range ' Rango de las fechas en la fila 4
-    Dim primeraColumnaGantt As Long
-    Dim ultimaColumnaGantt As Long
-    Dim filaActual As Long
-    Dim fechaInicioActividad As Date
-    Dim fechaFinActividad As Date
-    Dim columnaInicioGantt As Long
-    Dim columnaFinGantt As Long
-    Dim i As Long
-    Dim celdaGanttFila As Range
-    Dim estaFilaGanttVacia As Boolean
+Sub LlenarFechasVacias()
 
-    ' Define la hoja de cálculo "Plan"
-    Set ws = ThisWorkbook.Sheets("Plan") ' Asegúrate de que tu hoja se llama "Plan"
+  Dim ws As Worksheet
+  Dim ultimaFila As Long
+  Dim i As Long
+  Dim direccionIzquierda As String
+  Dim direccionDerecha As String
+  Dim valorIzquierdaFila4 As Variant
+  Dim valorDerechaFila4 As Variant
 
-    ' Encuentra la última fila con datos en la columna A (a partir de la fila 6)
-    ultimaFilaA = ws.Cells(Rows.Count, "A").End(xlUp).Row
+  ' Especifica la hoja de cálculo que quieres procesar
+  Set ws = ThisWorkbook.ActiveSheet ' Puedes cambiar ActiveSheet por el nombre de tu hoja
 
-    ' Define el rango de los encabezados de fecha del Gantt (fila 4, desde la columna K hasta la última columna con fecha)
-    Set rangoGanttEncabezados = ws.Range("K4", ws.Cells(4, Columns.Count).End(xlToLeft))
-    primeraColumnaGantt = rangoGanttEncabezados.Column
-    ultimaColumnaGantt = rangoGanttEncabezados.Column + rangoGanttEncabezados.Columns.Count - 1
+  ' Encuentra la última fila con datos en alguna columna (ajusta la columna si es necesario)
+  ultimaFila = ws.Cells(Rows.Count, "A").End(xlUp).Row
 
-    ' Itera a través de las filas desde la 6 hasta la última fila con valor en la columna A
-    For filaActual = 6 To ultimaFilaA
-        ' Verifica si la columna A de la fila actual tiene un valor
-        If Not IsEmpty(ws.Cells(filaActual, "A").Value) Then
-            ' Lee la fecha de inicio (columna E) y fin (columna D)
-            On Error Resume Next
-            fechaInicioActividad = DateValue(ws.Cells(filaActual, "D").Value)
-            fechaFinActividad = DateValue(ws.Cells(filaActual, "E").Value)
-            On Error GoTo 0
+  ' Itera a través de cada fila desde la fila 1 hasta la última fila con datos
+  For i = 1 To ultimaFila
 
-            ' Verifica si las fechas son válidas
-            If IsDate(fechaInicioActividad) And IsDate(fechaFinActividad) Then
-                ' Define el rango de la fila actual del Gantt (desde la primera hasta la última columna del encabezado)
-                Dim rangoFilaGantt As Range
-                Set rangoFilaGantt = ws.Range(ws.Cells(filaActual, primeraColumnaGantt), ws.Cells(filaActual, ultimaColumnaGantt))
-
-                ' Verifica si la fila del Gantt está vacía
-                estaFilaGanttVacia = True
-                For Each celdaGanttFila In rangoFilaGantt
-                    If Not IsEmpty(celdaGanttFila.Value) Then
-                        estaFilaGanttVacia = False
-                        Exit For
-                    End If
-                Next celdaGanttFila
-
-                ' Si la fila del Gantt está vacía, procede a dibujar
-                If estaFilaGanttVacia Then
-                    ' Encuentra la columna de inicio en el Gantt
-                    columnaInicioGantt = 0
-                    For i = primeraColumnaGantt To ultimaColumnaGantt
-                        If DateValue(ws.Cells(4, i).Value) = DateValue(fechaInicioActividad) Then
-                            columnaInicioGantt = i
-                            Exit For
-                        End If
-                    Next i
-
-                    ' Encuentra la columna de fin en el Gantt
-                    columnaFinGantt = 0
-                    For i = primeraColumnaGantt To ultimaColumnaGantt
-                        If DateValue(ws.Cells(4, i).Value) = DateValue(fechaFinActividad) Then
-                            columnaFinGantt = i
-                            Exit For
-                        End If
-                    Next i
-
-                    ' Si se encontraron las columnas de inicio y fin, llena el rango con "x"
-                    If columnaInicioGantt > 0 And columnaFinGantt > 0 Then
-                        ' Asegurarse de que la columna de fin no sea anterior a la de inicio
-                        If columnaFinGantt >= columnaInicioGantt Then
-                            ws.Range(ws.Cells(filaActual, columnaInicioGantt), ws.Cells(filaActual, columnaFinGantt)).Value = "x"
-                        Else
-                            MsgBox "La fecha de fin es anterior a la fecha de inicio en la fila " & filaActual & ".", vbExclamation
-                        End If
-                    Else
-                        If columnaInicioGantt = 0 Then
-                            MsgBox "No se encontró la fecha de inicio en el encabezado del Gantt para la fila " & filaActual & ".", vbExclamation
-                        End If
-                        If columnaFinGantt = 0 Then
-                            MsgBox "No se encontró la fecha de fin en el encabezado del Gantt para la fila " & filaActual & ".", vbExclamation
-                        End If
-                    End If
-                End If
-            Else
-                ' Si las fechas no son válidas, podrías mostrar un mensaje o simplemente omitir la fila
-                MsgBox "Fechas de inicio o fin no válidas en la fila " & filaActual & ".", vbExclamation
-            End If
+    ' Para la columna D: ejecuta la función si la celda está vacía
+    If Trim(ws.Cells(i, "D").Value) = "" Then
+      direccionIzquierda = CalcDireccionMasIzquierda(i)
+      If direccionIzquierda <> "" Then
+        ' Extrae la letra de la columna de la dirección
+        Dim columnaIzquierda As String
+        columnaIzquierda = Split(direccionIzquierda, "$")(1)
+        ' Obtiene el valor de la fila 4 de esa columna
+        If ws.Rows(4).Columns(columnaIzquierda).Row = 4 Then
+          valorIzquierdaFila4 = ws.Rows(4).Columns(columnaIzquierda).Value
+          ws.Cells(i, "D").Value = valorIzquierdaFila4
+        Else
+          ws.Cells(i, "D").Value = "" ' O algún otro valor si no hay fila 4 válida
         End If
-    Next filaActual
+      Else
+        ws.Cells(i, "D").Value = "" ' Si no se encontró dirección izquierda
+      End If
+    End If
 
-    MsgBox "Proceso de dibujo del Gantt completado.", vbInformation
+    ' Para la columna E: ejecuta la función si la celda está vacía
+    If Trim(ws.Cells(i, "E").Value) = "" Then
+      direccionDerecha = CalcDireccionMasDerecha(i)
+      If direccionDerecha <> "" Then
+        ' Extrae la letra de la columna de la dirección
+        Dim columnaDerecha As String
+        columnaDerecha = Split(direccionDerecha, "$")(1)
+        ' Obtiene el valor de la fila 4 de esa columna
+        If ws.Rows(4).Columns(columnaDerecha).Row = 4 Then
+          valorDerechaFila4 = ws.Rows(4).Columns(columnaDerecha).Value
+          ws.Cells(i, "E").Value = valorDerechaFila4
+        Else
+          ws.Cells(i, "E").Value = "" ' O algún otro valor si no hay fila 4 válida
+        End If
+      Else
+        ws.Cells(i, "E").Value = "" ' Si no se encontró dirección derecha
+      End If
+    End If
+
+  Next i
+
+  MsgBox "Proceso completado.", vbInformation
+
 End Sub
+
+' (Las funciones CalcDireccionMasIzquierda y CalcDireccionMasDerecha
+'  deben estar definidas en el mismo módulo)
+
+' Función CalcDireccionMasIzquierda
+Function CalcDireccionMasIzquierda(fila As Long) As String
+
+  Dim celda As Range
+  Dim ultimaColumna As Long
+
+  ultimaColumna = Cells(fila, Columns.Count).End(xlToLeft).Column
+
+  For Each celda In Range(Cells(fila, "K"), Cells(fila, ultimaColumna))
+    If Trim(celda.Value) <> "" Then
+      CalcDireccionMasIzquierda = celda.Address
+      Exit Function
+    End If
+  Next celda
+
+  CalcDireccionMasIzquierda = ""
+
+End Function
+
+' Función CalcDireccionMasDerecha
+Function CalcDireccionMasDerecha(fila As Long) As String
+
+  Dim ultimaColumna As Long
+  Dim i As Long
+
+  ultimaColumna = Cells(fila, Columns.Count).End(xlToLeft).Column
+
+  For i = ultimaColumna To Columns("K").Column Step -1
+    If Trim(Cells(fila, i).Value) <> "" Then
+      CalcDireccionMasDerecha = Cells(fila, i).Address
+      Exit Function
+    End If
+  Next i
+
+  CalcDireccionMasDerecha = ""
+
+End Function
