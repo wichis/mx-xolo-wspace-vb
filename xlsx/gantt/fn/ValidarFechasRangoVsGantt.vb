@@ -1,3 +1,52 @@
+'-----------------------------------------------------------------------
+' Sub ValidarFechasVsGanttThenRemarcar
+' 
+' Descripción:
+' Esta subrutina valida que las fechas de inicio y fin de actividades 
+' en un rango de Gantt coincidan con las marcas correspondientes en la 
+' hoja de cálculo. Si las fechas no coinciden, se remarcan utilizando 
+' un estilo definido como "Incorrecto".
+'
+' Parámetros:
+'   Ninguno
+'
+' Variables locales:
+'   ws                - Objeto Worksheet que representa la hoja activa.
+'   ultimaFila        - Última fila con datos en la columna "E".
+'   rangoGantt        - Rango de celdas donde se encuentra el Gantt.
+'   fechaInicio       - Fecha de inicio de la actividad.
+'   fechaFin          - Fecha de fin de la actividad.
+'   primeraColumnaGantt - Columna inicial del rango de Gantt.
+'   ultimaColumnaGantt - Columna final del rango de Gantt.
+'   celdaInicioGantt  - Celda que marca el inicio de la actividad en el Gantt.
+'   celdaFinGantt     - Celda que marca el fin de la actividad en el Gantt.
+'   i                 - Índice para recorrer las filas.
+'   j                 - Índice para recorrer las columnas.
+'   encontradoInicio  - Indicador de si se encontró una celda de inicio en el Gantt.
+'   encontradoFin     - Indicador de si se encontró una celda de fin en el Gantt.
+'   ESTILO_INCORRECTO - Constante que define el estilo utilizado para remarcar fechas incorrectas.
+'
+' Funcionalidad:
+' 1. Define la hoja donde se encuentra el Gantt.
+' 2. Identifica la última fila con datos y el rango de Gantt.
+' 3. Recorre cada fila de actividades:
+'    - Obtiene las fechas de inicio y fin.
+'    - Limpia el formato de las celdas de fecha.
+'    - Identifica las celdas de inicio y fin en el Gantt.
+'    - Valida si las fechas coinciden con las marcas del Gantt:
+'      - Si no coinciden, se remarcan con el estilo "Incorrecto".
+' 4. Muestra un mensaje indicando que la validación ha terminado.
+'
+' Mensajes:
+'   - Muestra un MsgBox al finalizar la validación.
+'
+' Autor:
+'   [Tu Nombre o Información de Contacto]
+'
+' Fecha:
+'   [Fecha de Creación]
+'
+'-----------------------------------------------------------------------
 Sub ValidarFechasVsGanttThenRemarcar()
     Dim ws As Worksheet
     Dim ultimaFila As Long
