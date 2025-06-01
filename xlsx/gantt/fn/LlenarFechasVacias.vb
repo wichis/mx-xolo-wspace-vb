@@ -44,7 +44,7 @@ Sub LlenarFechasVacias()
   ultimaFila = ws.Cells(Rows.Count, "A").End(xlUp).Row
 
   ' Itera a través de cada fila desde la fila 1 hasta la última fila con datos
-  For i = 1 To ultimaFila
+  For i = 6 To ultimaFila
 
     ' Para la columna D: ejecuta la función si la celda está vacía
     If Trim(ws.Cells(i, "D").Value) = "" Then
